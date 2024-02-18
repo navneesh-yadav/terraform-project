@@ -8,7 +8,7 @@ This project uses Terraform to define and deploy AWS infrastructure components n
 
 ## Architecture 
 
-![vpc-peering](https://github.com/navneesh-yadav/terraform-project/assets/66907873/5fb4f0bc-4835-4532-b8cd-f13ff4f12d17)
+![vpc-peering](https://github.com/navneesh-yadav/terraform-project/assets/66907873/c51fd43b-0bab-4458-b13b-9846b53d8c3d)
 
 
 ### VPCs and Subnets

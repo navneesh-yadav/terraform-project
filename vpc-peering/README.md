@@ -4,7 +4,7 @@ This Terraform configuration automates the setup of an AWS infrastructure, inclu
 
 ## Overview
 
-This project uses Terraform to define and deploy AWS infrastructure components necessary for hosting applications and services in a cloud environment. The infrastructure is structured to provide isolation and secure communication between different environments.
+Yes, in the provided Terraform configuration, access to SSH from a public subnet instance to a private subnet instance is facilitated through Security Group rules.
 
 ## Architecture 
 
@@ -57,6 +57,17 @@ This project uses Terraform to define and deploy AWS infrastructure components n
 - **Instance 2 (`ec2-test-vpc-2`)**:
   - Launched in `test-vpc-2` subnet.
   - Security Group: `sgp-2`.
+
+
+## How It Works
+
+1. **Security Group `sgp-2`**:
+   - In the configuration, `sgp-2` is associated with the EC2 instance (`ec2-test-vpc-2`) launched in the private subnet (`test-vpc-2-subnet`).
+   - `sgp-2` allows inbound traffic on port 22 (SSH) from the specific CIDR block `10.0.1.0/24`, which corresponds to the CIDR block of the subnet `test-vpc-1-subnet`. This allows SSH access from instances within the `test-vpc-1-subnet` to instances associated with `sgp-2`.
+
+2. **EC2 Instance `ec2-test-vpc-1`**:
+   - This instance is launched in the public subnet (`test-vpc-1-subnet`), which has an internet gateway attached, allowing it to communicate with the internet.
+   - Since `ec2-test-vpc-1` is in the public subnet and has an associated public IP address due to `associate_public_ip_address` being set to `true`, it can initiate outbound SSH connections to the private subnet instance (`ec2-test-vpc-2`) via its private IP address.
 
 ## Usage
 

@@ -1,0 +1,46 @@
+name: Deploy Dev Environment
+
+# Trigger this workflow when code is pushed to the 'main' branch
+on:
+  push:
+    branches:
+      - main
+
+# ENTERPRISE STANDARD: Give the workflow the permissions it needs for OIDC
+permissions:
+  id-token: write   # This is the MAGIC permission that allows GitHub to request the OIDC token
+  contents: read    # Allows the workflow to read your repository code
+
+jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    
+    # We define the working directory because our enterprise setup uses folders!
+    defaults:
+      run:
+        working-directory: ./environments/dev
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # PHASE 1 PAYOFF: Authenticate via OIDC!
+      - name: Configure AWS Credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: "YOUR_GITHUB_ACTIONS_ROLE_ARN" # <-- Paste your IAM Role ARN output here!
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.0" # Good practice to lock versions
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan

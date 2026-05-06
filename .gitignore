@@ -1,0 +1,14 @@
+# Local .terraform directories and files
+**/.terraform/
+.terraform.lock.hcl
+
+# Local state files (State should ONLY live in S3!)
+*.tfstate
+*.tfstate.backup
+
+# Crash logs
+crash.log
+
+# Ignore secret variable files (except our specific bootstrap one)
+*.tfvars
+!bootstrap/terraform.tfvars

@@ -1,46 +1,45 @@
-name: Deploy Dev Environment
+name: Terraform Dev Pipeline
 
-# Trigger this workflow when code is pushed to the 'main' branch
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-# ENTERPRISE STANDARD: Give the workflow the permissions it needs for OIDC
 permissions:
-  id-token: write   # This is the MAGIC permission that allows GitHub to request the OIDC token
-  contents: read    # Allows the workflow to read your repository code
+  id-token: write
+  contents: read
+  pull-requests: write # Allows GitHub to post the Plan as a comment
 
 jobs:
-  terraform-deploy:
+  terraform:
     runs-on: ubuntu-latest
-    
-    # We define the working directory because our enterprise setup uses folders!
     defaults:
       run:
         working-directory: ./environments/dev
-
+    
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # PHASE 1 PAYOFF: Authenticate via OIDC!
-      - name: Configure AWS Credentials using OIDC
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ vars.AWS_ROLE_ARN }} # <-- Paste your IAM Role ARN output here!
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.7.0" # Good practice to lock versions
 
       - name: Terraform Init
         run: terraform init
 
       - name: Terraform Plan
-        run: terraform plan -out=tfplan
+        id: plan
+        run: terraform plan -no-color
+        # This allows us to capture the plan output even if it's a PR
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve tfplan
+        # ONLY run apply if it's a push to main (not a PR)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: terraform apply -auto-approve

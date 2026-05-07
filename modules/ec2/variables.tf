@@ -1,7 +1,7 @@
 variable "ami_id" {
   description = "The Amazon Machine Image ID"
   type        = string
-  default     = "ami-0c55b159cbfafe1f0" # standard Amazon Linux AMI
+  default     = "ami-0eb38b817b93460ac" # standard Amazon Linux AMI
 }
 
 variable "instance_type" {

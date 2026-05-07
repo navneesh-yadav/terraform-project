@@ -11,10 +11,6 @@ permissions:
   contents: read
   pull-requests: write
 
-# This dynamically sets the role based on whether it's a PR or a push to main
-env:
-  ROLE_TO_ASSUME: ${{ github.event_name == 'pull_request' && vars.AWS_PLAN_ROLE_ARN || vars.AWS_APPLY_ROLE_ARN }}
-
 jobs:
   terraform:
     runs-on: ubuntu-latest
@@ -26,12 +22,23 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Uses the dynamic role we defined in the 'env' block above
-      - name: Configure AWS Credentials
+      # ==========================================
+      # BULLETPROOF ROLE SWITCHING
+      # ==========================================
+      - name: Configure AWS Credentials (Plan Role for PRs)
+        if: github.event_name == 'pull_request'
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ env.ROLE_TO_ASSUME }}
+          role-to-assume: ${{ vars.AWS_PLAN_ROLE_ARN }}
           aws-region: us-east-1
+
+      - name: Configure AWS Credentials (Apply Role for Main)
+        if: github.event_name == 'push'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_APPLY_ROLE_ARN }}
+          aws-region: us-east-1
+      # ==========================================
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3

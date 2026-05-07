@@ -1,10 +1,7 @@
 name: Deploy Dev Environment
 
 # Trigger this workflow when code is pushed to the 'main' branch
-on:
-  push:
-    branches:
-      - main
+#on:
 
 # ENTERPRISE STANDARD: Give the workflow the permissions it needs for OIDC
 permissions:
